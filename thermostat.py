@@ -86,6 +86,10 @@ def run():
         current_temp_f = current_temp_c * 9 / 5 + 32
         print(f'Current Temperature: {current_temp_f:.1f}°F')
 
+        # **Send current temperature to Adafruit IO**
+        aio.send('current-temperature', current_temp_f)
+        print('Current temperature sent to Adafruit IO.')
+
         # Step 3: Get temperature setpoint from Adafruit IO (in Fahrenheit)
         setpoint_f = float(aio.receive('temperature-setpoint').value)
         print(f'Temperature Setpoint: {setpoint_f}°F')
