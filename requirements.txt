@@ -1,0 +1,3 @@
+requests
+Adafruit_IO
+python-dotenv
