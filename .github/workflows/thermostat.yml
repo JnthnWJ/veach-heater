@@ -1,0 +1,32 @@
+name: Run Thermostat Script
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Script
+        run: |
+          python thermostat.py
+        env:
+          SWITCHBOT_TOKEN: ${{ secrets.SWITCHBOT_TOKEN }}
+          SWITCHBOT_SECRET: ${{ secrets.SWITCHBOT_SECRET }}
+          ADAFRUIT_IO_USERNAME: ${{ secrets.ADAFRUIT_IO_USERNAME }}
+          ADAFRUIT_IO_KEY: ${{ secrets.ADAFRUIT_IO_KEY }}
