@@ -2,3 +2,4 @@ requests
 Adafruit_IO
 python-dotenv
 setuptools
+pytz
