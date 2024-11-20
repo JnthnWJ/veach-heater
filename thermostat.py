@@ -94,6 +94,7 @@ def run():
         response = requests.get(f'{BASE_URL}/devices/{dummy_ac_device_id}/status', headers=headers)
         response.raise_for_status()
         dummy_ac_status = response.json()['body']
+        print(f"Dummy AC Status: {dummy_ac_status}")
         ac_mode = dummy_ac_status.get('mode', '')
         print(f"Dummy AC Mode: {ac_mode}")
 
