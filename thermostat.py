@@ -51,6 +51,12 @@ def run():
         response.raise_for_status()
         devices = response.json()['body']
 
+        # **Print all infrared remote devices to verify device IDs**
+        print("Infrared Remote Devices:")
+        for device in devices['infraredRemoteList']:
+            print(f"Name: {device['deviceName']}, ID: {device['deviceId']}, Type: {device['remoteType']}")
+
+
         # Find Hub 2 device ID
         hub_device_id = None
         for device in devices['deviceList']:
