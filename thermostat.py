@@ -6,6 +6,8 @@ import hashlib
 import base64
 import requests
 from Adafruit_IO import Client
+import datetime
+import pytz  # Make sure pytz is installed in your GitHub Actions environment
 
 def run():
     try:
@@ -66,8 +68,8 @@ def run():
         # Find heater device ID
         heater_device_id = None
         for device in devices['infraredRemoteList']:
-            device_name = device['deviceName'].strip().lower()
-            if device_name == HEATER_NAME.strip().lower():
+            device_name = device['deviceName']
+            if device_name.lower() == HEATER_NAME.lower():
                 heater_device_id = device['deviceId']
                 break
 
@@ -93,6 +95,19 @@ def run():
         # Step 3: Get temperature setpoint from Adafruit IO (in Fahrenheit)
         setpoint_f = float(aio.receive('temperature-setpoint').value)
         print(f'Temperature Setpoint: {setpoint_f}°F')
+
+        # Adjust setpoint during morning hours
+        # Get current time in California timezone
+        pacific_tz = pytz.timezone('America/Los_Angeles')
+        current_time_pacific = datetime.datetime.now(pacific_tz)
+        print(f'Current Time in California: {current_time_pacific.strftime("%Y-%m-%d %H:%M:%S")}')
+
+        # Check if current time is between 6 am and 8 am
+        if 6 <= current_time_pacific.hour < 8:
+            setpoint_f += 5
+            print('Morning hours detected. Increased setpoint by 5°F.')
+        else:
+            print('Regular hours. Setpoint remains unchanged.')
 
         # Convert setpoint to Celsius
         setpoint_c = (setpoint_f - 32) * 5 / 9
@@ -150,7 +165,7 @@ def run():
             print('Temperature within setpoint range. No action needed.')
 
         # Log the action
-        print(f"{time.asctime()}: Current Temp={current_temp_c}°C ({current_temp_f:.1f}°F), Setpoint={setpoint_c:.2f}°C ({setpoint_f}°F), Heater State={heater_state}")
+        print(f"{current_time_pacific.strftime('%Y-%m-%d %H:%M:%S')}: Current Temp={current_temp_c}°C ({current_temp_f:.1f}°F), Setpoint={setpoint_c:.2f}°C ({setpoint_f}°F), Heater State={heater_state}")
 
     except Exception as e:
         print(f"An error occurred: {e}")
