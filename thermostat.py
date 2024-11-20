@@ -22,6 +22,15 @@ def run():
         # Initialize Adafruit IO REST client
         aio = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
 
+        # Step 0: Check if System is Active
+        system_state = aio.receive('veach-thermostat-status').value.upper()
+        print(f'System State: {system_state}')
+        if system_state != 'ON':
+            print('Thermostat system is turned OFF via veach-thermostat-status feed.')
+            return  # Exit the script without running thermostat logic
+        else:
+            print('Thermostat system is turned ON.')
+
         # Function to generate SwitchBot API signature
         def generate_signature(token, secret):
             nonce = uuid.uuid4()
@@ -56,7 +65,6 @@ def run():
         for device in devices['infraredRemoteList']:
             print(f"Name: {device['deviceName']}, ID: {device['deviceId']}, Type: {device['remoteType']}")
 
-
         # Find Hub 2 device ID
         hub_device_id = None
         for device in devices['deviceList']:
@@ -82,35 +90,6 @@ def run():
         if not heater_device_id:
             print(f"Heater '{HEATER_NAME}' not found.")
             return
-
-        # **Find Dummy Air Conditioner Device ID**
-        DUMMY_AC_NAME = 'onoffswitch'  # Update this with the name of your dummy AC
-        dummy_ac_device_id = None
-        for device in devices['infraredRemoteList']:
-            device_name = device['deviceName']
-            if device_name.lower() == DUMMY_AC_NAME.lower():
-                dummy_ac_device_id = device['deviceId']
-                break
-
-        if not dummy_ac_device_id:
-            print(f"Dummy Air Conditioner '{DUMMY_AC_NAME}' not found.")
-            return
-
-        # **Get Dummy AC Status**
-        response = requests.get(f'{BASE_URL}/devices/{dummy_ac_device_id}/status', headers=headers)
-        response.raise_for_status()
-        dummy_ac_status = response.json()
-        print(f"Full Dummy AC API Response: {dummy_ac_status}")  # Add this line
-        ac_mode = dummy_ac_status.get('body', {}).get('mode', '')
-        print(f"Dummy AC Mode: {ac_mode}")
-
-        # **Check if System Should Be Active**
-        # Modes: 'auto', 'cool', 'dry', 'fan', 'heat'
-        if ac_mode.lower() != 'heat':
-            print("Thermostat system is turned OFF via Dummy AC.")
-            return  # Exit the script without running thermostat logic
-        else:
-            print("Thermostat system is turned ON via Dummy AC.")
 
         # Proceed with thermostat logic
 
