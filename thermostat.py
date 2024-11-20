@@ -93,9 +93,9 @@ def run():
         # **Get Dummy AC Status**
         response = requests.get(f'{BASE_URL}/devices/{dummy_ac_device_id}/status', headers=headers)
         response.raise_for_status()
-        dummy_ac_status = response.json()['body']
-        print(f"Dummy AC Status: {dummy_ac_status}")
-        ac_mode = dummy_ac_status.get('mode', '')
+        dummy_ac_status = response.json()
+        print(f"Full Dummy AC API Response: {dummy_ac_status}")  # Add this line
+        ac_mode = dummy_ac_status.get('body', {}).get('mode', '')
         print(f"Dummy AC Mode: {ac_mode}")
 
         # **Check if System Should Be Active**
