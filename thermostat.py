@@ -7,7 +7,7 @@ import base64
 import requests
 from Adafruit_IO import Client
 import datetime
-import pytz  # Make sure pytz is installed in your GitHub Actions environment
+import pytz  # Ensure pytz is installed in your environment
 
 def run():
     try:
@@ -76,6 +76,36 @@ def run():
         if not heater_device_id:
             print(f"Heater '{HEATER_NAME}' not found.")
             return
+
+        # **Find Dummy Air Conditioner Device ID**
+        DUMMY_AC_NAME = 'onoffswitch'  # Update this with the name of your dummy AC
+        dummy_ac_device_id = None
+        for device in devices['infraredRemoteList']:
+            device_name = device['deviceName']
+            if device_name.lower() == DUMMY_AC_NAME.lower():
+                dummy_ac_device_id = device['deviceId']
+                break
+
+        if not dummy_ac_device_id:
+            print(f"Dummy Air Conditioner '{DUMMY_AC_NAME}' not found.")
+            return
+
+        # **Get Dummy AC Status**
+        response = requests.get(f'{BASE_URL}/devices/{dummy_ac_device_id}/status', headers=headers)
+        response.raise_for_status()
+        dummy_ac_status = response.json()['body']
+        ac_mode = dummy_ac_status.get('mode', '')
+        print(f"Dummy AC Mode: {ac_mode}")
+
+        # **Check if System Should Be Active**
+        # Modes: 'auto', 'cool', 'dry', 'fan', 'heat'
+        if ac_mode.lower() != 'heat':
+            print("Thermostat system is turned OFF via Dummy AC.")
+            return  # Exit the script without running thermostat logic
+        else:
+            print("Thermostat system is turned ON via Dummy AC.")
+
+        # Proceed with thermostat logic
 
         # Step 2: Get current temperature from Hub 2
         response = requests.get(f'{BASE_URL}/devices/{hub_device_id}/status', headers=headers)
