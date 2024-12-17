@@ -2,7 +2,7 @@ name: Run Thermostat Script
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 0 31 2 *'
   workflow_dispatch:
 
 jobs:
